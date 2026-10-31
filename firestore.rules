@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isMember(code) {
+      return signedIn() &&
+        request.auth.uid in get(/databases/$(database)/documents/coupleRooms/$(code)).data.memberUids;
+    }
+    match /coupleRooms/{code} {
+      allow create: if signedIn()
+        && request.resource.data.memberUids == [request.auth.uid];
+      allow read: if isMember(code);
+      // The room code is the invitation secret. Permit exactly one second member.
+      allow update: if signedIn()
+        && resource.data.memberUids.size() == 1
+        && request.resource.data.memberUids.size() == 2
+        && request.resource.data.memberUids.hasAll(resource.data.memberUids)
+        && request.resource.data.memberUids.hasAny([request.auth.uid])
+        && !(request.auth.uid in resource.data.memberUids)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids']);
+      allow delete: if false;
+      match /messages/{messageId} {
+        allow read: if isMember(code);
+        allow create: if isMember(code)
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.name is string
+          && request.resource.data.name.size() <= 24
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000
+          && request.resource.data.kind in ['message','love'];
+        allow update, delete: if false;
+      }
+    }
+  }
+}
