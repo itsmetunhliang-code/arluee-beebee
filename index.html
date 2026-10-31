@@ -16,7 +16,10 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase
 import {getAuth,signInAnonymously,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {getFirestore,doc,setDoc,getDoc,updateDoc,arrayUnion,collection,addDoc,query,orderBy,limit,onSnapshot,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyAntmcbhIvvbTz5yfjpq5gX-4J2_fL1nNo",authDomain:"arluee-beebee.firebaseapp.com",projectId:"arluee-beebee",storageBucket:"arluee-beebee.firebasestorage.app",messagingSenderId:"52427943760",appId:"1:52427943760:web:77d04fd0cf289f2c9fc655",measurementId:"G-4J25WMG6GM"};
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
+const app=initializeApp(firebaseConfig),
+auth=getAuth(app),
+db=getFirestore(app,"beebee"),
+$=id=>document.getElementById(id);
 let user=null,roomCode=null,displayName="",stopMessages=null;
 signInAnonymously(auth).catch(e=>$("gateStatus").textContent="Sign-in error: "+e.message);
 onAuthStateChanged(auth,u=>user=u);
